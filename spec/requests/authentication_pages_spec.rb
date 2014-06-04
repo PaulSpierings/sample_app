@@ -31,6 +31,7 @@ describe "Authentication" do
       it { should have_link('Sign out',    href: signout_path) }
       it { should_not have_link('Sign in', href: signin_path) }
 
+
     end
   end
 
@@ -39,6 +40,18 @@ describe "Authentication" do
    describe "for non-signed-in users" do
       let(:user) { FactoryGirl.create(:user) }
 
+      describe "in the Microposts controller" do
+
+        describe "submitting to the create action" do
+          before { post microposts_path }
+          specify { expect(response).to redirect_to(signin_path) }
+        end
+
+        describe "submitting to the destroy action" do
+          before { delete micropost_path(FactoryGirl.create(:micropost)) }
+          specify { expect(response).to redirect_to(signin_path) }
+        end
+      end
       
       describe "at the home page for unsigned users" do
         before do
@@ -48,6 +61,7 @@ describe "Authentication" do
         it { should_not have_link('Settings',    href: edit_user_path(user)) }
         it { should_not have_link('Sign out',    href: signout_path) }
         it { should have_link('Sign in', href: signin_path) }
+        
       end
 
       describe "when attempting to visit a protected page" do
@@ -62,6 +76,13 @@ describe "Authentication" do
 
           it "should render the desired protected page" do
             expect(page).to have_title('Edit user')
+          end
+
+          describe "should not have signup on the home page" do
+            before do
+              visit root_url
+            end
+            it { should_not have_link('Sign up now!',    href: signup_path) }
           end
 
           describe "when signing in again" do
