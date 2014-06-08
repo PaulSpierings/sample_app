@@ -24,12 +24,12 @@ describe "Authentication" do
       let(:user) { FactoryGirl.create(:user) }
       before { sign_in user }
 
-      it { should have_title(user.name) }
       it { should have_link('Users',       href: users_path) }
       it { should have_link('Profile',     href: user_path(user)) }
       it { should have_link('Settings',    href: edit_user_path(user)) }
       it { should have_link('Sign out',    href: signout_path) }
       it { should_not have_link('Sign in', href: signin_path) }
+      it { should have_link('view my profile')}
 
 
     end
@@ -94,8 +94,8 @@ describe "Authentication" do
               click_button "Sign in"
             end
 
-            it "should render the default (profile) page" do
-              expect(page).to have_title(user.name)
+            it "should render the home page" do
+              expect(page).to have_link("view my profile")
             end
           end
         end
@@ -117,7 +117,32 @@ describe "Authentication" do
           before { visit users_path }
           it { should have_title('Sign in') }
         end
+
+        describe "visiting the following page" do
+          before { visit following_user_path(user) }
+          it { should have_title('Sign in') }
+        end
+
+        describe "visiting the followers page" do
+          before { visit followers_user_path(user) }
+          it { should have_title('Sign in') }
+        end
+
       end
+
+      describe "in the Relationships controller" do
+        describe "submitting to the create action" do
+          before { post relationships_path }
+          specify { expect(response).to redirect_to(signin_path) }
+        end
+
+        describe "submitting to the destroy action" do
+          before { delete relationship_path(1) }
+          specify { expect(response).to redirect_to(signin_path) }
+        end
+      end
+
+      
     end
 
     describe "as wrong user" do
